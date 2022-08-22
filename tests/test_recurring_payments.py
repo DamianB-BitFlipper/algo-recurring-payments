@@ -2,6 +2,7 @@ import pytest
 import algosdk
 
 from algopytest import (
+    dummy_function,
     payment_transaction,
     smart_signature_transaction,    
     group_elem,
@@ -37,3 +38,6 @@ def test_pull_payment_raises(smart_signature, owner, user1):
     with pytest.raises(algosdk.error.AlgodHTTPError, match=r'transaction .* invalid : transaction .* rejected by logic'):
         smart_signature_transaction(smart_signature, txn)
     
+
+def test_dummy_function():
+    assert dummy_function() < 420
