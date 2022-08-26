@@ -10,7 +10,14 @@ from recurring_payments_smart_sig import recurring_txns
 
 @fixture
 def smart_signature(owner, user1):
-    compiled_program = compile_program(recurring_txns(user1.address), mode=Mode.Signature)
+    compiled_program = compile_program(recurring_txns([user1.address]), mode=Mode.Signature)
+    lsig = LogicSigAccount(compiled_program)
+    lsig.sign(owner.private_key)
+    return lsig
+
+@fixture
+def smart_signature_two_receivers(owner, user1, user2):
+    compiled_program = compile_program(recurring_txns([user1.address, user2.address]), mode=Mode.Signature)
     lsig = LogicSigAccount(compiled_program)
     lsig.sign(owner.private_key)
     return lsig
