@@ -21,7 +21,7 @@ def recurring_txns(receivers_addr):
         txn_unit = Gtxn[i]
             
         tx_type_cond = txn_unit.type_enum() == TxnType.Payment        
-        fee_cond = txn_unit.fee() <= tmpl_fee
+        fee_cond = txn_unit.fee() >= tmpl_fee
         recv_cond = txn_unit.receiver() == Addr(receiver_addr)
         amount_cond = txn_unit.amount() == tmpl_amount
         
