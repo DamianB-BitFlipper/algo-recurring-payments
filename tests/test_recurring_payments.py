@@ -5,8 +5,10 @@ from algopytest import (
     payment_transaction,
     smart_signature_transaction,    
     TxnElemsContext,
+    TxnIDContext,
     group_transaction,
     suggested_params,
+    transaction_info,
 )
 
 TMPL_FEE = 1000
@@ -27,7 +29,10 @@ def test_pull_payment_single_receiver(smart_signature, owner, user1):
     with TxnElemsContext():
         _, txn = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
 
-    smart_signature_transaction(smart_signature, txn)
+    with TxnIDContext():
+        txn_id, _ = smart_signature_transaction(smart_signature, txn)
+
+    assert 'logicsig' in transaction_info(txn_id)['transaction']['signature']
 
 def test_pull_payment_multiple_receiver(smart_signature_two_receivers, owner, user1, user2):
     params = suggested_params(flat_fee=True, fee=TMPL_FEE)
