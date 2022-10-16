@@ -27,7 +27,7 @@ def test_pull_payment_single_receiver(smart_signature, owner, user1):
     params.last = params.first + TMPL_DURATION
 
     with TxnElemsContext():
-        _, txn = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
+        txn = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
 
     with TxnIDContext():
         txn_id, _ = smart_signature_transaction(smart_signature, txn)
@@ -40,8 +40,8 @@ def test_pull_payment_multiple_receiver(smart_signature_two_receivers, owner, us
     params.last = params.first + TMPL_DURATION
 
     with TxnElemsContext():
-        _, txn0 = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
-        _, txn1 = payment_transaction(sender=owner, receiver=user2, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_1', params=params)
+        txn0 = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
+        txn1 = payment_transaction(sender=owner, receiver=user2, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_1', params=params)
 
         lsig_txn0 = smart_signature_transaction(smart_signature_two_receivers, txn0)
         lsig_txn1 = smart_signature_transaction(smart_signature_two_receivers, txn1)
@@ -55,7 +55,7 @@ def test_pull_payment_raises_invalid_first_round(smart_signature, owner, user1):
     params.last = params.first + TMPL_DURATION
 
     with TxnElemsContext():
-        _, txn = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
+        txn = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
 
     with pytest.raises(algosdk.error.AlgodHTTPError, match=r'transaction .* invalid : transaction .* rejected by logic'):
         smart_signature_transaction(smart_signature, txn)
