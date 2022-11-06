@@ -48,15 +48,27 @@ def test_pull_payment_multiple_receiver(smart_signature_two_receivers, owner, us
 
     group_transaction(lsig_txn0, lsig_txn1)
 
-def test_pull_payment_raises_invalid_first_round(smart_signature, owner, user1):
+@pytest.mark.parametrize(
+    "invalid_param",
+    [
+        ({"first-round": 1}),
+        ({"lease": f"{TMPL_LEASE}XX"}),
+        ({"amount": TMPL_AMOUNT + 1}),
+        ({"amount": TMPL_AMOUNT - 1}),        
+    ]
+)
+def test_pull_payment_raises(smart_signature, owner, user1, invalid_param):
+    _first_round = invalid_param.get('first-round', 0)
+    _lease = invalid_param.get('lease', f"{TMPL_LEASE}_0")
+    _amount = invalid_param.get('amount', TMPL_AMOUNT)
+    
     params = suggested_params(flat_fee=True, fee=TMPL_FEE)
     # The first valid round is no longer a multiple of `TMPL_PERIOD` which will cause the failure
-    params.first = round_down(params.first, TMPL_PERIOD) + 1
+    params.first = round_down(params.first, TMPL_PERIOD) + _first_round
     params.last = params.first + TMPL_DURATION
 
     with TxnElemsContext():
-        txn = payment_transaction(sender=owner, receiver=user1, amount=TMPL_AMOUNT, lease=f'{TMPL_LEASE}_0', params=params)
+        txn = payment_transaction(sender=owner, receiver=user1, amount=_amount, lease=_lease, params=params)
 
     with pytest.raises(algosdk.error.AlgodHTTPError, match=r'transaction .* invalid : transaction .* rejected by logic'):
         smart_signature_transaction(smart_signature, txn)
-
