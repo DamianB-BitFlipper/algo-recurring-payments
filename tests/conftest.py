@@ -1,7 +1,7 @@
 from pyteal import Mode
 from algopytest import compile_program
 from pytest import fixture
-from algosdk.future.transaction import LogicSigAccount
+from algosdk.transaction import LogicSigAccount
 
 # Load the smart signatures from this project. The path to find these
 # imports is set by the environment variable `$PYTHONPATH`.
