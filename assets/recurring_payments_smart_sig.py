@@ -17,9 +17,12 @@ def recurring_txns(receivers_addr):
     num_txns_cond = Global.group_size() == Int(len(receivers_addr))
     txn_conds = []
 
+    # Allow a list of recipients to pull a fixed amount of Algos at a fixed interval
+    # from the account that signed this smart signature.
     for i, receiver_addr in enumerate(receivers_addr):
         txn_unit = Gtxn[i]
-            
+
+        # Check that the expected receiver is getting paid the expected amount
         tx_type_cond = txn_unit.type_enum() == TxnType.Payment        
         fee_cond = txn_unit.fee() >= tmpl_fee
         recv_cond = txn_unit.receiver() == Addr(receiver_addr)
@@ -27,14 +30,17 @@ def recurring_txns(receivers_addr):
         
         # Combine together all of the parameter conditions
         params_conds = And(num_txns_cond, tx_type_cond, fee_cond, recv_cond, amount_cond)
-        
+
+        # Test that the transaction is being issued within a `tmpl_duration` time-window.
+        # Also prevent any double spending by having a constant lease per recipient.
         first_valid_cond = txn_unit.first_valid() % tmpl_period == Int(0)
         last_valid_cond = txn_unit.last_valid() == tmpl_duration + txn_unit.first_valid()
         lease_cond = txn_unit.lease() == format_lease(f'{tmpl_lease}_{i}')
 
         # Combine together all of the recurring conditions
         recurring_conds = And(first_valid_cond, last_valid_cond, lease_cond)
-        
+
+        # Make sure no account closing or rekeying is occurring.
         close_remainder_cond = txn_unit.close_remainder_to() == Global.zero_address()
         rekey_cond = txn_unit.rekey_to() == Global.zero_address()
         
