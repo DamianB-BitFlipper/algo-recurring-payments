@@ -22,6 +22,11 @@ def round_down(n, k):
     return n - (n % k)
 
 def test_pull_payment_single_receiver(smart_signature, owner, user1):
+    """Test that a single receiver can pull from ``owner`` via their signed ``smart_signature``.
+
+    This test showcases AlgoPytest's context managers ``TxnElemsContext`` and ``TxnIDContext``
+    which modify the behavior of any AlgoPytest transaction operators within their blocks. It
+    also proves that the transaction sent was signed using the logic (smart) signature."""
     params = suggested_params(flat_fee=True, fee=TMPL_FEE)
     params.first = round_down(params.first, TMPL_PERIOD)
     params.last = params.first + TMPL_DURATION
@@ -35,6 +40,7 @@ def test_pull_payment_single_receiver(smart_signature, owner, user1):
     assert 'logicsig' in transaction_info(txn_id)['transaction']['signature']
 
 def test_pull_payment_multiple_receiver(smart_signature_two_receivers, owner, user1, user2):
+    """Test that multiple receivers can pull from ``owner`` via their signed ``smart_signature``."""
     params = suggested_params(flat_fee=True, fee=TMPL_FEE)
     params.first = round_down(params.first, TMPL_PERIOD)
     params.last = params.first + TMPL_DURATION
@@ -58,6 +64,13 @@ def test_pull_payment_multiple_receiver(smart_signature_two_receivers, owner, us
     ]
 )
 def test_pull_payment_raises(smart_signature, owner, user1, invalid_param):
+    """Test the various failure modes of the smart signature.
+
+    The smart signature should reject any transaction that:
+    - has a faulty round validity envelope.
+    - has a faulty lease.
+    - is pulling too many Algos.
+    - is pulling too few Algos."""
     _first_round = invalid_param.get('first-round', 0)
     _lease = invalid_param.get('lease', f"{TMPL_LEASE}_0")
     _amount = invalid_param.get('amount', TMPL_AMOUNT)
